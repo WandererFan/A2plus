@@ -219,6 +219,8 @@ def importPartFromFile(_doc, filename, importToCache=False):
             newObj = doc.addObject( "Part::FeaturePython", str(partName.encode('utf-8')) )    # works on Python 3.6.5
         newObj.Label = partLabel
 
+    newObj.Proxy = Proxy_muxAssemblyObj()
+    newObj.ViewObject.Proxy = ImportedPartViewProviderProxy()
 
     newObj.addProperty("App::PropertyString", "a2p_Version","importPart").a2p_Version = A2P_VERSION
     newObj.addProperty("App::PropertyFile",    "sourceFile",    "importPart").sourceFile = filename
@@ -231,8 +233,7 @@ def importPartFromFile(_doc, filename, importToCache=False):
     newObj.addProperty("App::PropertyBool","subassemblyImport","importPart").subassemblyImport = subAssemblyImport
     newObj.setEditorMode("subassemblyImport",1)
     newObj.addProperty("App::PropertyBool","updateColors","importPart").updateColors = True
-    newObj.ViewObject.addDisplayMode(coin.SoGroup(),"Flat Lines")
-    #
+
     if subAssemblyImport:
         newObj.muxInfo, newObj.Shape, newObj.ViewObject.DiffuseColor = muxObjectsWithKeys(importableObjects, withColor=True)
         #newObj.muxInfo, newObj.Shape = muxObjectsWithKeys(importDoc, withColor=False)
@@ -244,9 +245,6 @@ def importPartFromFile(_doc, filename, importToCache=False):
             newObj.ViewObject.DiffuseColor = tmpObj.ViewObject.DiffuseColor
         newObj.muxInfo = createTopoInfo(tmpObj)
         newObj.ViewObject.Transparency = tmpObj.ViewObject.Transparency
-
-    newObj.Proxy = Proxy_muxAssemblyObj()
-    newObj.ViewObject.Proxy = ImportedPartViewProviderProxy()
 
     doc.recompute()
 
@@ -447,7 +445,11 @@ def duplicateImportedPart( part ):
     partLabel = a2plib.findUnusedObjectLabel(nameBase,document=doc)
     newObj = doc.addObject("Part::FeaturePython", partName)
     newObj.Label = partLabel
-    #
+
+    newObj.Proxy = Proxy_importPart()
+    newObj.ViewObject.Proxy = ImportedPartViewProviderProxy()
+
+
     if hasattr(part,'a2p_Version'):
         newObj.addProperty("App::PropertyString", "a2p_Version","importPart").a2p_Version = part.a2p_Version
     newObj.addProperty("App::PropertyFile",    "sourceFile",    "importPart").sourceFile = part.sourceFile
@@ -460,13 +462,13 @@ def duplicateImportedPart( part ):
     if hasattr(part, 'subassemblyImport'):
         newObj.addProperty("App::PropertyBool","subassemblyImport","importPart").subassemblyImport = part.subassemblyImport
     newObj.Shape = part.Shape.copy()
+
     for p in part.ViewObject.PropertiesList: #assuming that the user may change the appearance of parts differently depending on their role in the assembly.
-        if hasattr(newObj.ViewObject, p) and p not in ['DiffuseColor','Proxy','MappedColors']:
+        if hasattr(part.ViewObject, p) and p not in ['DiffuseColor','Proxy','MappedColors']:
             setattr(newObj.ViewObject, p, getattr( part.ViewObject, p))
+
     newObj.ViewObject.DiffuseColor = copy.copy( part.ViewObject.DiffuseColor )
     newObj.ViewObject.Transparency = part.ViewObject.Transparency
-    newObj.Proxy = Proxy_importPart()
-    newObj.ViewObject.Proxy = ImportedPartViewProviderProxy()
     newObj.Placement.Base = part.Placement.Base
     newObj.Placement.Rotation = part.Placement.Rotation
     return newObj
