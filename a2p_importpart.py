@@ -437,29 +437,20 @@ def updateImportedParts(doc):
                     ):
                     if not objectCache.isCached(absPath): # Load every changed object one time to cache
                         importPartFromFile(doc, absPath, importToCache=True) # the version is now in the cache
-                    newObject = objectCache.get(absPath)
+                        
+                    cachedObject = objectCache.get(absPath)
                     obj.timeLastImport = newPartCreationTime
-                    if hasattr(newObject, 'a2p_Version'):
+                    if hasattr(cachedObject, 'a2p_Version'):
                         obj.a2p_Version = A2P_VERSION
-                    importUpdateConstraintSubobjects( doc, obj, newObject ) # do this before changing shape and mux
-                    if hasattr(newObject, 'muxInfo'):
-                        obj.muxInfo = newObject.muxInfo
-                    # save Placement because following newObject.Shape.copy() isn't resetting it to zeroes...
+                    importUpdateConstraintSubobjects( doc, obj, cachedObject ) # do this before changing shape and mux
+                    if hasattr(cachedObject, 'muxInfo'):
+                        obj.muxInfo = cachedObject.muxInfo
+                    # save Placement because following cachedObject.Shape.copy() isn't resetting it to zeroes...
                     savedPlacement  = obj.Placement
-                    obj.Shape = newObject.Shape.copy()
-###                    obj.ViewObject.DiffuseColor = copy.copy(newObject.ViewObject.DiffuseColor) ### MASTER APPROACH
-###                    obj.ViewObject.Transparency = newObject.ViewObject.Transparency            ### MASTER APPROACH
-###
-##                    if len(newObject.ViewObject.DiffuseColor) < len(newObject.Shape.Faces):     ## 2nd try
-##                        obj.ViewObject.ShapeColor = newObject.ViewObject.ShapeColor             ## 2nd try
-##                        obj.ViewObject.Transparency = newObject.ViewObject.Transparency         ## 2nd try
-##                    else:                                                                       ## 2nd try
-##                        obj.ViewObject.DiffuseColor = newObject.ViewObject.DiffuseColor         ## 2nd try
-##
-#                    obj.ViewObject.ShapeColor = copy.deepcopy(newObject.ViewObject.ShapeColor)      #3rd try
-#                    obj.ViewObject.Transparency = copy.deepcopy(newObject.ViewObject.Transparency)  #3rd try
-#                    obj.ViewObject.DiffuseColor = copy.deepcopy(newObject.ViewObject.DiffuseColor)  #3rd try
-#                    obj.ViewObject.Transparency = newObject.ViewObject.Transparency                 #3rd try
+                    obj.Shape = cachedObject.Shape.copy()
+                    obj.ViewObject.ShapeColor = cachedObject.ViewObject.ShapeColor
+                    obj.ViewObject.Transparency = cachedObject.ViewObject.Transparency
+                    obj.ViewObject.DiffuseColor = cachedObject.ViewObject.DiffuseColor   #diffuse must be set last
 
                     obj.Placement = savedPlacement # restore the old placement
 

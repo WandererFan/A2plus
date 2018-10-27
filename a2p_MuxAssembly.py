@@ -64,6 +64,10 @@ def makePlacedShape(obj):
     tempShape.Placement = plmGlobal
     return tempShape
 
+def makeDiffuseElement(color,trans):
+    elem = (color[0],color[1],color[2],trans/100.0)
+    return elem
+
 def muxAssemblyWithTopoNames(doc, withColor=False):
     '''
     Mux an a2p assenbly
@@ -115,12 +119,9 @@ def muxAssemblyWithTopoNames(doc, withColor=False):
         
         # Save Computing time, store this before the for..enumerate loop later...
         colorFlag = ( len(obj.ViewObject.DiffuseColor) < len(obj.Shape.Faces) )
-#        shapeCol = obj.ViewObject.ShapeColor                                   # MASTER APPROACH
-#        diffuseCol = obj.ViewObject.DiffuseColor                               # MASTER APPROACH
-        shapeCol = copy.deepcopy(obj.ViewObject.ShapeColor)                    ## for sCT-Mode: meaning: shapeColor
-        shapeTsp = copy.deepcopy(obj.ViewObject.Transparency)                  ## for sCT-Mode: |_  plus Transparency
-        comboCol = (shapeCol[0],shapeCol[1],shapeCol[2],float(shapeTsp/100.0)) ## comboCol: sCT-Mode color calculation
-        diffuseCol = copy.deepcopy(obj.ViewObject.DiffuseColor)                ## for dCi-Mode: diffuseColor per face[i]
+        shapeCol = obj.ViewObject.ShapeColor
+        objTrans = obj.ViewObject.Transparency
+        diffuseCol = obj.ViewObject.DiffuseColor
         tempShape = makePlacedShape(obj)
 
         # now start the loop with use of the stored values..(much faster)
@@ -138,7 +139,7 @@ def muxAssemblyWithTopoNames(doc, withColor=False):
 
             if withColor:
                 if colorFlag:
-                    faceColors.append(comboCol)
+                    faceColors.append(makeDiffuseElement(shapeCol,objTrans))
                     a2plib.DebugMsg(a2plib.A2P_DEBUG_3,"sCT-Mode\n") # debug improve-color info
                 else:
                     faceColors.append(diffuseCol[i])
@@ -164,6 +165,7 @@ def muxObjectsWithKeys(objsIn, withColor=False):
         colorFlag = ( len(obj.ViewObject.DiffuseColor) < len(obj.Shape.Faces) )
         shapeCol = obj.ViewObject.ShapeColor
         diffuseCol = obj.ViewObject.DiffuseColor
+        objTrans = obj.ViewObject.Transparency
         tempShape = makePlacedShape(obj)
 
         # now start the loop with use of the stored values..(much faster)
@@ -173,7 +175,7 @@ def muxObjectsWithKeys(objsIn, withColor=False):
 
             if withColor:
                 if colorFlag:
-                    faceColors.append(shapeCol)
+                    faceColors.append(makeDiffuseElement(shapeCol,objTrans))
                 else:
                     faceColors.append(diffuseCol[i])
 
