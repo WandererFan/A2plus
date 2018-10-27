@@ -96,6 +96,7 @@ import FreeCAD, FreeCADGui, Part
 from FreeCAD import Base
 import a2plib
 import os
+import a2p_MuxAssembly as mux
 
 class TopoMapper(object):
     def __init__(self,doc):
@@ -432,6 +433,7 @@ class TopoMapper(object):
             ob = self.doc.getObject(objName)
             colorFlag = ( len(ob.ViewObject.DiffuseColor) < len(ob.Shape.Faces) )
             shapeCol = ob.ViewObject.ShapeColor
+            objTrans = ob.ViewObject.Transparency
             diffuseCol = ob.ViewObject.DiffuseColor
             tempShape = self.makePlacedShape(ob)
 
@@ -441,7 +443,7 @@ class TopoMapper(object):
     
                 if withColor:
                     if colorFlag:
-                        faceColors.append(shapeCol)
+                        faceColors.append(mux.makeDiffuseElement(shapeCol,objTrans))
                     else:
                         faceColors.append(diffuseCol[i])
 
